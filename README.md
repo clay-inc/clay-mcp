@@ -5,7 +5,7 @@
 A simple Model Context Protocol (MCP) server for [Clay](https://clay.earth).
 
 ## Demo Video
-Coming soon!
+<a href="https://www.youtube.com/watch?v=vaB0s9i7Djo"><img src="https://userimg-assets.customeriomail.com/images/client-env-86186/1744863883565_CleanShot%202025-04-17%20at%2000.24.16@2x_01JS0ZVWJ1M36ZN9FS9CD3D9R3.png" alt="Clay Logo" width="700"/></a>
 
 ## Getting Started
 ### Via Smithery (fastest)

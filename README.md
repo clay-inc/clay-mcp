@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/clay-inc-clay-mcp-badge.png)](https://mseep.ai/app/clay-inc-clay-mcp)
+
 <a href="https://clay.earth"><img src="https://assets.clay.earth/emails/assets/logo_badge.png" alt="Clay Logo" width="70"/></a>
 
 # Clay MCP Server

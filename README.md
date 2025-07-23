@@ -4,6 +4,10 @@
 
 A simple Model Context Protocol (MCP) server for [Clay](https://clay.earth).
 
+<a href="https://glama.ai/mcp/servers/@clay-inc/clay-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@clay-inc/clay-mcp/badge" alt="Clay MCP server" />
+</a>
+
 ## Demo Video
 <a href="https://www.youtube.com/watch?v=vaB0s9i7Djo"><img src="https://userimg-assets.customeriomail.com/images/client-env-86186/1744863883565_CleanShot%202025-04-17%20at%2000.24.16@2x_01JS0ZVWJ1M36ZN9FS9CD3D9R3.png" alt="Clay Logo" width="700"/></a>
 

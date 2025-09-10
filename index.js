@@ -316,8 +316,5 @@ server.addTool({
 });
 
 server.start({
-  transportType: "httpStream",
-  httpStream: {
-    port: process.env.PORT ? parseInt(process.env.PORT) : undefined,
-  }
+  transportType: "stdio",
 });

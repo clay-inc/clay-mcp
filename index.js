@@ -315,6 +315,11 @@ server.addTool({
   execute: async (params) => callTool("/moments/events", params),
 });
 
+const httpTransport = process.env.TRANSPORT === "http";
+
 server.start({
-  transportType: "stdio",
+  transportType: httpTransport ? "httpStream" : "stdio",
+  httpStream: {
+    port: process.env.PORT ? Number.parseInt(process.env.PORT) : undefined,
+  }
 });

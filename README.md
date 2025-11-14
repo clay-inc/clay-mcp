@@ -2,6 +2,8 @@
 
 # Clay MCP Server
 
+[![smithery badge](https://smithery.ai/badge/@clay-inc/clay-mcp)](https://smithery.ai/server/@clay-inc/clay-mcp)
+
 A simple Model Context Protocol (MCP) server for [Clay](https://clay.earth).
 
 ## Demo Video
@@ -9,7 +11,6 @@ A simple Model Context Protocol (MCP) server for [Clay](https://clay.earth).
 
 ## Getting Started
 ### Via Smithery (fastest)
-[![smithery badge](https://smithery.ai/badge/@clay-inc/clay-mcp)](https://smithery.ai/server/@clay-inc/clay-mcp)
 1. [Click here to log into Clay and generate your Clay API key](https://web.clay.earth/settings/api-keys).
 2. [Visit Clay's Smithery page](https://smithery.ai/server/@clay-inc/clay-mcp) and enter your Clay API key under "Installation".
 3. Under Claude > NPM, copy the NPM command and run it in your terminal.

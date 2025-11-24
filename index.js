@@ -6,13 +6,34 @@ import { z } from "zod";
 const server = new FastMCP({
   name: "Clay",
   version: "1.0.2",
+  authenticate: async (request) => {
+    let apiKey = process.env.CLAY_API_KEY;
+
+    if(request && request.url) {
+      try {
+        const url = new URL(request.url, "http://localhost");
+        const clayApiKey = url.searchParams.get("clayApiKey");
+
+        if(clayApiKey) {
+          apiKey = clayApiKey;
+        }
+      } catch (e) {
+        console.error('Error getting api key', e)
+      }
+    }
+
+    return {
+      apiKey,
+    }
+  }
 });
 
-async function callTool(path, params) {
+async function callTool(path, params, session) {
+  console.log('Calling tool', path, session)
   return fetch(`https://nexum.clay.earth/tools${path}`, {
     body: JSON.stringify(params),
     headers: {
-      Authorization: `ApiKey ${process.env.CLAY_API_KEY}`,
+      Authorization: `ApiKey ${session.apiKey}`,
       "Content-Type": "application/json",
     },
     method: "POST",
@@ -72,7 +93,7 @@ server.addTool({
       )
       .optional(),
   }),
-  execute: async (params) => callTool("/search", params),
+  execute: async (params, { session }) => callTool("/search", params, session),
 });
 
 server.addTool({
@@ -128,7 +149,7 @@ server.addTool({
       )
       .optional(),
   }),
-  execute: async (params) => callTool("/search-interactions", params),
+  execute: async (params, { session }) => callTool("/search-interactions", params, session),
 });
 
 server.addTool({
@@ -172,7 +193,7 @@ server.addTool({
       .number()
       .describe("The ID of the contact to get details for."),
   }),
-  execute: async (params) => callTool("/get-contact", params),
+  execute: async (params, { session }) => callTool("/get-contact", params, session),
 });
 
 server.addTool({
@@ -213,7 +234,7 @@ server.addTool({
       )
       .optional(),
   }),
-  execute: async (params) => callTool("/create-contact", params),
+  execute: async (params, { session }) => callTool("/create-contact", params, session),
 });
 
 server.addTool({
@@ -226,7 +247,7 @@ server.addTool({
       .describe("The ID of the contact to add the note to."),
     content: z.string().describe("The content of the note."),
   }),
-  execute: async (params) => callTool("/note", params),
+  execute: async (params, { session }) => callTool("/note", params, session),
 });
 
 server.addTool({
@@ -293,7 +314,7 @@ server.addTool({
         "Use Date Math with now +/- time intervals. Supported units: d (days), w (weeks), M (months), y (years), h (hours), m (minutes), s (seconds). Examples: now-1d (yesterday), now+2w (2 weeks ahead), now/M (start of month), now+1M/M (start of next month)."
       ),
   }),
-  execute: async (params) => callTool("/moments/notes", params),
+  execute: async (params, { session }) => callTool("/moments/notes", params, session),
 });
 
 server.addTool({
@@ -312,7 +333,7 @@ server.addTool({
         "Use Date Math with now +/- time intervals. Supported units: d (days), w (weeks), M (months), y (years), h (hours), m (minutes), s (seconds). Examples: now-1d (yesterday), now+2w (2 weeks ahead), now/M (start of month), now+1M/M (start of next month)."
       ),
   }),
-  execute: async (params) => callTool("/moments/events", params),
+  execute: async (params, { session }) => callTool("/moments/events", params, session),
 });
 
 const httpTransport = process.env.TRANSPORT === "http";

@@ -65,7 +65,7 @@
   "type": "module",
   "private": false,
   "dependencies": {
-    "fastmcp": "^3.16.0"
+    "fastmcp": "^3.23.1"
   },
   "bin": {
     "clay-mcp": "./index.js"

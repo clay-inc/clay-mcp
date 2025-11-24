@@ -5,7 +5,7 @@ import { z } from "zod";
 
 const server = new FastMCP({
   name: "Clay",
-  version: "1.0.2",
+  version: "1.0.5",
   authenticate: async (request) => {
     let apiKey = process.env.CLAY_API_KEY;
 

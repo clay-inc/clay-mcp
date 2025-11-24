@@ -1,6 +1,6 @@
 {
   "name": "@clayhq/clay-mcp",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A Model Context Protocol (MCP) server for Clay",
   "author": "Clay <care@clay.earth>",
   "files": [

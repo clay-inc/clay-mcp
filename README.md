@@ -1,6 +1,9 @@
+```markdown
 <a href="https://clay.earth"><img src="https://assets.clay.earth/emails/assets/logo_badge.png" alt="Clay Logo" width="70"/></a>
 
 # Clay MCP Server
+
+<a href="https://smithery.ai/server/@clay-inc/clay-mcp"><img alt="Smithery Badge" src="https://smithery.ai/badge/@clay-inc/clay-mcp"></a>
 
 A simple Model Context Protocol (MCP) server for [Clay](https://clay.earth).
 
@@ -59,3 +62,4 @@ A simple Model Context Protocol (MCP) server for [Clay](https://clay.earth).
 
 ## More information
 Learn more and reach out at the [Clay Library](https://library.clay.earth).
+```

@@ -4,12 +4,13 @@
 
 A simple Model Context Protocol (MCP) server for [Clay](https://clay.earth).
 
+[![smithery badge](https://smithery.ai/badge/@clay-inc/clay-mcp)](https://smithery.ai/server/@clay-inc/clay-mcp)
+
 ## Demo Video
 <a href="https://www.youtube.com/watch?v=vaB0s9i7Djo"><img src="https://userimg-assets.customeriomail.com/images/client-env-86186/1744863883565_CleanShot%202025-04-17%20at%2000.24.16@2x_01JS0ZVWJ1M36ZN9FS9CD3D9R3.png" alt="Clay Logo" width="700"/></a>
 
 ## Getting Started
 ### Via Smithery (preferred)
-[![smithery badge](https://smithery.ai/badge/@clay-inc/clay-mcp)](https://smithery.ai/server/@clay-inc/clay-mcp)
 1. [Click here to log into Clay and generate your Clay API key](https://web.clay.earth/settings/api-keys).
 2. [Visit Clay's Smithery page](https://smithery.ai/server/@clay-inc/clay-mcp), choose your preferred client (e.g. Claude, ChatGPT, Poke, Cursor, Raycast, etc.) and enter your Clay API key.
 <img src="https://userimg-assets.customeriomail.com/images/client-env-86186/1764095811163_CleanShot%202025-11-25%20at%2013.36.30@2x_01KAY4VQPY0XSJJJX0WGJQ806R.png" width="400"/>

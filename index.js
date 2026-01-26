@@ -3,6 +3,92 @@
 import { FastMCP } from "fastmcp";
 import { z } from "zod";
 
+const jobTitleSchema = z
+  .array(z.string())
+  .describe(
+    "If the query refers to a job title, position, or industry, list relevant job titles as they would be on a LinkedIn profile. Examples: Developer should return positions such as 'Software Engineer', 'Full Stack Developer', 'Data Scientist', etc. Banker should return positions such as 'Financial Analyst', 'Investment Banker', 'Credit Analyst', etc. Healthcare industry should return positions such as 'Registered Nurse', 'Physician', 'Medical Director', etc. Legal industry should return positions such as 'Attorney', 'Legal Counsel', 'Paralegal', etc."
+  )
+  .default([]);
+
+const companyNameSchema = z
+  .array(z.string())
+  .describe(
+    "If the query refers to a company or acronym of companies, list company names as they would on a LinkedIn profile."
+  )
+  .default([]);
+
+const locationSchema = z
+  .array(z.string())
+  .describe(
+    'If the query refers to a location (city, state, country, region) where people are located or based, list the locations as they would appear on a LinkedIn profile. For example, if someone asks about "people in New York", return "New York City Metropolitan Area" or if they ask about "contacts in California", return "San Francisco Bay Area", "Greater Los Angeles Area", etc.'
+  )
+  .default([]);
+
+const searchQuerySchema = z
+  .string()
+  .describe(
+    'The raw search query from the user. Must preserve exact intent and details to enable accurate searching, including: relationship qualifiers, interaction metrics, relationship strength, names, companies, locations, dates (specific dates, date ranges, or relative dates like "last week" are required if mentioned by user), job titles, skills, and logical conditions (OR/AND).'
+  );
+
+const aggregateQuerySchema = z
+  .string()
+  .describe(
+    "The raw search query from the user. This field is required and should contain all the key details extracted from the user's prompt to enable effective database searching and aggregation. For example, if the user asks 'how many people work at Google', preserve both the company filter 'Google' and the fact that they want a count. If they ask 'what are the most common job titles in my network', preserve that they want job titles aggregated and ranked by frequency. The query should maintain any conditions (OR, AND) and aggregation needs to properly build the elasticsearch query."
+  );
+
+const keywordsSchema = z
+  .array(z.string())
+  .describe(
+    "Extract and list specific keywords related to professional expertise, skills, interests, or hobbies that the user is searching for. For example, if someone asks for 'people who know about machine learning or play tennis', the keywords would be ['machine learning', 'tennis']. Do not include job titles or company names here as those have dedicated fields. Focus on capturing domain expertise, technical skills, personal interests, and hobby-related terms that help identify relevant contacts."
+  )
+  .default([]);
+
+const limitSchema = z
+  .number()
+  .describe(
+    "The number of contacts to return if the user asks for an amount."
+  )
+  .default(10);
+
+const excludeContactIdsSchema = z
+  .array(z.number())
+  .describe(
+    'Used to exclude previously returned contact IDs when the user asks for more results (e.g. "who else" or "show me more"). You should pass all contact IDs from previous searchContacts responses to ensure new results are shown.'
+  )
+  .optional();
+
+const sortInstructionsSchema = z
+  .string()
+  .describe(
+    'How would you like the results sorted? For example: "most recent contacts" will sort by last interaction date, "closest connections" will sort by interaction count, and "alphabetical" will sort by name. If no sort preference is given, this can be left empty.'
+  )
+  .optional();
+
+const dateMathSchema = z
+  .string()
+  .describe(
+    "Use Date Math with now +/- time intervals. Supported units: d (days), w (weeks), M (months), y (years), h (hours), m (minutes), s (seconds). Examples: now-1d (yesterday), now+2w (2 weeks ahead), now/M (start of month), now+1M/M (start of next month)."
+  );
+
+const baseSearchParams = {
+  job_title: jobTitleSchema,
+  company_name: companyNameSchema,
+  location: locationSchema,
+  query: searchQuerySchema,
+  keywords: keywordsSchema,
+};
+
+const paginationParams = {
+  limit: limitSchema,
+  exclude_contact_ids: excludeContactIdsSchema,
+  sort_instructions: sortInstructionsSchema,
+};
+
+const dateRangeParams = {
+  start: dateMathSchema,
+  end: dateMathSchema,
+};
+
 const server = new FastMCP({
   name: "Clay",
   version: "1.0.5",
@@ -45,53 +131,8 @@ server.addTool({
   description:
     'Search for contacts and return matching people. Use for questions about specific contacts or "who" questions (e.g. "Who did I meet most?" or "who works as an engineer?"). Returns actual contact records for queries needing specific people.',
   parameters: z.object({
-    job_title: z
-      .array(z.string())
-      .describe(
-        "If the query refers to a job title, position, or industry, list relevant job titles as they would be on a LinkedIn profile. Examples: Developer should return positions such as 'Software Engineer', 'Full Stack Developer', 'Data Scientist', etc. Banker should return positions such as 'Financial Analyst', 'Investment Banker', 'Credit Analyst', etc. Healthcare industry should return positions such as 'Registered Nurse', 'Physician', 'Medical Director', etc. Legal industry should return positions such as 'Attorney', 'Legal Counsel', 'Paralegal', etc."
-      )
-      .default([]),
-    company_name: z
-      .array(z.string())
-      .describe(
-        "If the query refers to a company or acronym of companies, list company names as they would on a LinkedIn profile."
-      )
-      .default([]),
-    location: z
-      .array(z.string())
-      .describe(
-        'If the query refers to a location (city, state, country, region) where people are located or based, list the locations as they would appear on a LinkedIn profile. For example, if someone asks about "people in New York", return "New York City Metropolitan Area" or if they ask about "contacts in California", return "San Francisco Bay Area", "Greater Los Angeles Area", etc.'
-      )
-      .default([]),
-    query: z
-      .string()
-      .describe(
-        'The raw search query from the user. Must preserve exact intent and details to enable accurate searching, including: relationship qualifiers, interaction metrics, relationship strength, names, companies, locations, dates (specific dates, date ranges, or relative dates like "last week" are required if mentioned by user), job titles, skills, and logical conditions (OR/AND).'
-      ),
-    keywords: z
-      .array(z.string())
-      .describe(
-        "Extract and list specific keywords related to professional expertise, skills, interests, or hobbies that the user is searching for. For example, if someone asks for 'people who know about machine learning or play tennis', the keywords would be ['machine learning', 'tennis']. Do not include job titles or company names here as those have dedicated fields. Focus on capturing domain expertise, technical skills, personal interests, and hobby-related terms that help identify relevant contacts."
-      )
-      .default([]),
-    limit: z
-      .number()
-      .describe(
-        "The number of contacts to return if the user asks for an amount."
-      )
-      .default(10),
-    exclude_contact_ids: z
-      .array(z.number())
-      .describe(
-        'Used to exclude previously returned contact IDs when the user asks for more results (e.g. "who else" or "show me more"). You should pass all contact IDs from previous searchContacts responses to ensure new results are shown.'
-      )
-      .optional(),
-    sort_instructions: z
-      .string()
-      .describe(
-        'How would you like the results sorted? For example: "most recent contacts" will sort by last interaction date, "closest connections" will sort by interaction count, and "alphabetical" will sort by name. If no sort preference is given, this can be left empty.'
-      )
-      .optional(),
+    ...baseSearchParams,
+    ...paginationParams,
   }),
   execute: async (params, { session }) => callTool("/search", params, session),
 });
@@ -101,53 +142,8 @@ server.addTool({
   description:
     'Search for interactions and return matching interactions. Use for questions about specific interactions, "who" questions (e.g. "Who did I meet most?"), finding best friends based on relevance score, or finding recently added/created contacts. Returns actual contact records for queries needing specific interactions.',
   parameters: z.object({
-    job_title: z
-      .array(z.string())
-      .describe(
-        "If the query refers to a job title, position, or industry, list relevant job titles as they would be on a LinkedIn profile. Examples: Developer should return positions such as 'Software Engineer', 'Full Stack Developer', 'Data Scientist', etc. Banker should return positions such as 'Financial Analyst', 'Investment Banker', 'Credit Analyst', etc. Healthcare industry should return positions such as 'Registered Nurse', 'Physician', 'Medical Director', etc. Legal industry should return positions such as 'Attorney', 'Legal Counsel', 'Paralegal', etc."
-      )
-      .default([]),
-    company_name: z
-      .array(z.string())
-      .describe(
-        "If the query refers to a company or acronym of companies, list company names as they would on a LinkedIn profile."
-      )
-      .default([]),
-    location: z
-      .array(z.string())
-      .describe(
-        'If the query refers to a location (city, state, country, region) where people are located or based, list the locations as they would appear on a LinkedIn profile. For example, if someone asks about "people in New York", return "New York City Metropolitan Area" or if they ask about "contacts in California", return "San Francisco Bay Area", "Greater Los Angeles Area", etc.'
-      )
-      .default([]),
-    query: z
-      .string()
-      .describe(
-        'The raw search query from the user. Must preserve exact intent and details to enable accurate searching, including: relationship qualifiers, interaction metrics, relationship strength, names, companies, locations, dates (specific dates, date ranges, or relative dates like "last week" are required if mentioned by user), job titles, skills, and logical conditions (OR/AND).'
-      ),
-    keywords: z
-      .array(z.string())
-      .describe(
-        "Extract and list specific keywords related to professional expertise, skills, interests, or hobbies that the user is searching for. For example, if someone asks for 'people who know about machine learning or play tennis', the keywords would be ['machine learning', 'tennis']. Do not include job titles or company names here as those have dedicated fields. Focus on capturing domain expertise, technical skills, personal interests, and hobby-related terms that help identify relevant contacts."
-      )
-      .default([]),
-    limit: z
-      .number()
-      .describe(
-        "The number of contacts to return if the user asks for an amount."
-      )
-      .default(10),
-    exclude_contact_ids: z
-      .array(z.number())
-      .describe(
-        'Used to exclude previously returned contact IDs when the user asks for more results (e.g. "who else" or "show me more"). You should pass all contact IDs from previous searchContacts responses to ensure new results are shown.'
-      )
-      .optional(),
-    sort_instructions: z
-      .string()
-      .describe(
-        'How would you like the results sorted? For example: "most recent contacts" will sort by last interaction date, "closest connections" will sort by interaction count, and "alphabetical" will sort by name. If no sort preference is given, this can be left empty.'
-      )
-      .optional(),
+    ...baseSearchParams,
+    ...paginationParams,
   }),
   execute: async (params, { session }) => callTool("/search-interactions", params, session),
 });
@@ -157,29 +153,10 @@ server.addTool({
   description:
     'Get numerical statistics and counts ONLY. Returns numbers and percentages, never specific contacts. For counting questions like "how many work at Google?" or "what % are engineers?". Use search endpoint instead for any "who" questions or to get actual contact details.',
   parameters: z.object({
-    job_title: z
-      .array(z.string())
-      .describe(
-        "If the query refers to a job title, position, or industry, list relevant job titles as they would be on a LinkedIn profile. Examples: Developer should return positions such as 'Software Engineer', 'Full Stack Developer', 'Data Scientist', etc. Banker should return positions such as 'Financial Analyst', 'Investment Banker', 'Credit Analyst', etc. Healthcare industry should return positions such as 'Registered Nurse', 'Physician', 'Medical Director', etc. Legal industry should return positions such as 'Attorney', 'Legal Counsel', 'Paralegal', etc."
-      )
-      .default([]),
-    company_name: z
-      .array(z.string())
-      .describe(
-        "If the query refers to a company or acronym of companies, list company names as they would on a LinkedIn profile."
-      )
-      .default([]),
-    location: z
-      .array(z.string())
-      .describe(
-        'If the query refers to a location (city, state, country, region) where people are located or based, list the locations as they would appear on a LinkedIn profile. For example, if someone asks about "people in New York", return "New York City Metropolitan Area" or if they ask about "contacts in California", return "San Francisco Bay Area", "Greater Los Angeles Area", etc.'
-      )
-      .default([]),
-    query: z
-      .string()
-      .describe(
-        "The raw search query from the user. This field is required and should contain all the key details extracted from the user's prompt to enable effective database searching and aggregation. For example, if the user asks 'how many people work at Google', preserve both the company filter 'Google' and the fact that they want a count. If they ask 'what are the most common job titles in my network', preserve that they want job titles aggregated and ranked by frequency. The query should maintain any conditions (OR, AND) and aggregation needs to properly build the elasticsearch query."
-      ),
+    job_title: jobTitleSchema,
+    company_name: companyNameSchema,
+    location: locationSchema,
+    query: aggregateQuerySchema,
   }),
   execute: async (params) => callTool("/aggregate", params),
 });
@@ -302,18 +279,7 @@ server.addTool({
   name: "getNotes",
   description:
     'Use ONLY when the user explicitly mentions "note" or "notes" to retrieve notes between two dates (e.g. "what notes from last week?"). Returns notes by creation date only - does NOT search note content or filter by other criteria. NEVER use this tool for finding contacts or any other purpose besides retrieving notes. This tool is strictly prohibited from being used unless "note" or "notes" are explicitly mentioned in the query.',
-  parameters: z.object({
-    start: z
-      .string()
-      .describe(
-        "Use Date Math with now +/- time intervals. Supported units: d (days), w (weeks), M (months), y (years), h (hours), m (minutes), s (seconds). Examples: now-1d (yesterday), now+2w (2 weeks ahead), now/M (start of month), now+1M/M (start of next month)."
-      ),
-    end: z
-      .string()
-      .describe(
-        "Use Date Math with now +/- time intervals. Supported units: d (days), w (weeks), M (months), y (years), h (hours), m (minutes), s (seconds). Examples: now-1d (yesterday), now+2w (2 weeks ahead), now/M (start of month), now+1M/M (start of next month)."
-      ),
-  }),
+  parameters: z.object(dateRangeParams),
   execute: async (params, { session }) => callTool("/moments/notes", params, session),
 });
 
@@ -321,18 +287,7 @@ server.addTool({
   name: "getEvents",
   description:
     'Use this tool ONLY to fetch meetings/events in a date range (e.g. "what meetings next week?", "show calendar for tomorrow"). DO NOT use for counting meetings, analyzing patterns, or finding frequent participants.',
-  parameters: z.object({
-    start: z
-      .string()
-      .describe(
-        "Use Date Math with now +/- time intervals. Supported units: d (days), w (weeks), M (months), y (years), h (hours), m (minutes), s (seconds). Examples: now-1d (yesterday), now+2w (2 weeks ahead), now/M (start of month), now+1M/M (start of next month)."
-      ),
-    end: z
-      .string()
-      .describe(
-        "Use Date Math with now +/- time intervals. Supported units: d (days), w (weeks), M (months), y (years), h (hours), m (minutes), s (seconds). Examples: now-1d (yesterday), now+2w (2 weeks ahead), now/M (start of month), now+1M/M (start of next month)."
-      ),
-  }),
+  parameters: z.object(dateRangeParams),
   execute: async (params, { session }) => callTool("/moments/events", params, session),
 });
 

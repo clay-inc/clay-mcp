@@ -10,7 +10,7 @@ A simple Model Context Protocol (MCP) server for [Clay](https://clay.earth).
 ## Getting Started
 
 ### Via Clay (preferred)
-1. Enter our MCP server url into your client (https://mcp.clay.earth/mcp)[https://mcp.clay.earth/mcp]
+1. Enter our MCP server url into your client [https://mcp.clay.earth/mcp](https://mcp.clay.earth/mcp)
 2. Followed the guided login flow to connect your account.
 
 
